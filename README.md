@@ -18,7 +18,7 @@ You must have `golang` installed on your computer. The project has been developp
 
 ### Compilation 
 
-Then it is justy a question of `make build` and you will find the binary in the `bin` directory. It makes a binary for Linux and MacOS.
+Then it is just a question of `make build` and you will find the binary in the `bin` directory. It makes a binary for Linux and MacOS.
 
 ### Use it
 
