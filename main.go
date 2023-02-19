@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net"
 	"strings"
 	"time"
 
@@ -18,30 +17,38 @@ const DOMAIN = "local."
 const TIMEOUT = 15
 
 type Group struct {
-	Hosts []net.IP               `json:"hosts"`
-	Vars  map[string]interface{} `json:"vars"`
+	Hosts []string               `json:"hosts"`
+	Vars  map[string]interface{} `json:"vars,omitempty"`
 }
 
-func GetInventory() map[string]Group {
+func GetInventory() map[string]interface{} {
 	resolver, err := zeroconf.NewResolver(nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	inventory := make(map[string]Group)
+	inventory := make(map[string]interface{})
 	// Channel to receive discovered service entries
 	entries := make(chan *zeroconf.ServiceEntry)
+	go func(results <-chan *zeroconf.ServiceEntry, inventory map[string]interface{}) {
+		hostvars := make(map[string]interface{})
 
-	go func(results <-chan *zeroconf.ServiceEntry, inventory map[string]Group) {
 		for entry := range results {
-			vars := make(map[string]interface{})
 			group := Group{
-				Hosts: entry.AddrIPv4,
-				Vars:  vars,
+				Hosts: []string{strings.TrimSuffix(entry.HostName, ".")},
 			}
 			groupname := strings.ReplaceAll(entry.HostName, ".", "")
 			inventory[groupname] = group
+
+			// Building the hostvars for meta
+			hvars := make(map[string]interface{})
+			hvars["public_ip"] = entry.AddrIPv4[0]
+			hostvars[strings.TrimSuffix(entry.HostName, ".")] = hvars
 		}
+
+		meta := make(map[string]interface{})
+		meta["hostvars"] = hostvars
+		inventory["_meta"] = meta
 	}(entries, inventory)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*TIMEOUT)
