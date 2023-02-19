@@ -34,16 +34,16 @@ func GetInventory() map[string]interface{} {
 		hostvars := make(map[string]interface{})
 
 		for entry := range results {
+			cleanhostname := strings.TrimSuffix(entry.HostName, ".")
 			group := Group{
-				Hosts: []string{strings.TrimSuffix(entry.HostName, ".")},
+				Hosts: []string{cleanhostname},
 			}
-			groupname := strings.ReplaceAll(entry.HostName, ".", "")
-			inventory[groupname] = group
+			inventory[strings.ReplaceAll(entry.HostName, ".", "")] = group
 
 			// Building the hostvars for meta
 			hvars := make(map[string]interface{})
 			hvars["public_ip"] = entry.AddrIPv4[0]
-			hostvars[strings.TrimSuffix(entry.HostName, ".")] = hvars
+			hostvars[cleanhostname] = hvars
 		}
 
 		meta := make(map[string]interface{})
