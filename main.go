@@ -53,7 +53,6 @@ func GetInventory() *Inventory {
 }
 
 func main() {
-
 	isList := flag.Bool("list", false, "List local hosts")
 	isHost := flag.Bool("host", false, "get values from an host")
 	flag.Parse()
