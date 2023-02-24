@@ -1,7 +1,11 @@
 package main
 
+import (
+	"net"
+)
+
 type Group struct {
-	Hosts []string               `json:"hosts"`
+	Hosts []net.IP               `json:"hosts"`
 	Vars  map[string]interface{} `json:"vars,omitempty"`
 }
 

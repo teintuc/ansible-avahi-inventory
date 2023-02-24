@@ -29,10 +29,10 @@ func GetInventory() *Inventory {
 	entries := make(chan *zeroconf.ServiceEntry)
 	go func(results <-chan *zeroconf.ServiceEntry, inventory *Inventory) {
 		for entry := range results {
-			cleanhostname := strings.TrimSuffix(entry.HostName, ".")
 			group := Group{
-				Hosts: []string{cleanhostname},
+				Hosts: entry.AddrIPv4,
 			}
+			cleanhostname := strings.TrimSuffix(entry.HostName, ".")
 			inventory.AddGroup(strings.ReplaceAll(cleanhostname, ".", "_"), group)
 			inventory.AddMetaHostvars(cleanhostname, "public_ip", entry.AddrIPv4[0])
 		}
